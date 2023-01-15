@@ -1,0 +1,64 @@
+import React, {useMemo} from 'react';
+import styled from 'styled-components';
+
+import {Button, Card, CardContent, Typography} from '@material-ui/core';
+// import Button from '../../../components/Button';
+// import Card from '../../../components/Card';
+// import CardContent from '../../../components/CardContent';
+import CardIcon from '../../../components/CardIcon';
+import Value from '../../../components/Value';
+import useEarnings from '../../../hooks/useEarnings';
+import useHarvest from '../../../hooks/useHarvest';
+import Label from '../../../components/Label';
+import {getDisplayBalance} from '../../../utils/formatBalance';
+import TokenSymbol from '../../../components/TokenSymbol';
+import {Bank} from '../../../bomb-finance';
+import useBombStats from '../../../hooks/useBombStats';
+import useShareStats from '../../../hooks/usebShareStats';
+
+interface HarvestProps {
+  bank: Bank;
+}
+
+const Harvest: React.FC<HarvestProps> = ({bank}) => {
+  const earnings = useEarnings(bank.contract, bank.earnTokenName, bank.poolId);
+  const {onReward} = useHarvest(bank);
+  const bombStats = useBombStats();
+  const tShareStats = useShareStats();
+
+  const tokenName = bank.earnTokenName === 'BSHARE' ? 'BSHARE' : 'BOMB';
+  const tokenStats = bank.earnTokenName === 'BSHARE' ? tShareStats : bombStats;
+  const tokenPriceInDollars = useMemo(
+    () => (tokenStats ? Number(tokenStats.priceInDollars).toFixed(2) : null),
+    [tokenStats],
+  );
+  const earnedInDollars = (Number(tokenPriceInDollars) * Number(getDisplayBalance(earnings))).toFixed(2);
+  return (
+    <>
+      <Label text={getDisplayBalance(earnings)} variant="yellow" />
+      <Label text={`≈ $${earnedInDollars}`} variant="yellow" />
+    </>
+  );
+};
+
+const StyledCardHeader = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+`;
+const StyledCardActions = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: ${(props) => props.theme.spacing[6]}px;
+  width: 100%;
+`;
+
+const StyledCardContentInner = styled.div`
+  align-items: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+export default Harvest;
