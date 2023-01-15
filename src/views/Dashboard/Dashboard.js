@@ -4,12 +4,7 @@ import UnlockWallet from '../../components/UnlockWallet';
 import moment from 'moment';
 import Page from '../../components/Page';
 import { createGlobalStyle } from 'styled-components';
-import CountUp from 'react-countup';
-import CardIcon from '../../components/CardIcon';
-import TokenSymbol from '../../components/TokenSymbol';
 import useBombStats from '../../hooks/useBombStats';
-import useLpStats from '../../hooks/useLpStats';
-import useLpStatsBTC from '../../hooks/useLpStatsBTC';
 import useModal from '../../hooks/useModal';
 import useZap from '../../hooks/useZap';
 import useBondStats from '../../hooks/useBondStats';
@@ -28,31 +23,21 @@ import useTotalStakedOnBoardroom from '../../hooks/useTotalStakedOnBoardroom';
 import useClaimRewardCheck from '../../hooks/boardroom/useClaimRewardCheck';
 import useWithdrawCheck from '../../hooks/boardroom/useWithdrawCheck';
 import ProgressCountdown from './components/ProgressCountdown';
-// import { Bomb as bombTesting } from '../../bomb-finance/deployments/deployments.testing.json';
-//import { Bomb as bombProd } from '../../bomb-finance/deployments/deployments.mainnet.json';
 import Harvest from './components/Harvest';
 import Stake from './components/Stake';
 import useHarvestFromBoardroom from '../../hooks/useHarvestFromBoardroom';
 import useEarningsOnBoardroom from '../../hooks/useEarningsOnBoardroom';
 import useApprove, {ApprovalState} from '../../hooks/useApprove';
 import { roundAndFormatNumber } from '../../0x';
-import MetamaskFox from '../../assets/img/metamask-fox.svg';
-import { Box, Button, Card, CardContent, Grid, Paper } from '@material-ui/core';
+import { Button} from '@material-ui/core';
 import ZapModal from '../Bank/components/ZapModal';
-import { Alert } from '@material-ui/lab';
-import { IoCloseOutline } from 'react-icons/io5';
-import { BiLoaderAlt } from 'react-icons/bi';
-import { makeStyles } from '@material-ui/core/styles';
 import useBombFinance from '../../hooks/useBombFinance';
-//import { ReactComponent as IconTelegram } from '../../assets/img/telegram.svg';
-import { Helmet } from 'react-helmet';
 import BombImage from '../../assets/img/bomb.png';
 import BombBTCImage from '../../assets/img/bomb-bitcoin-LP.png';
 import BShareBNBImage from '../../assets/img/bshare-bnb-LP.png'
 import BBondImage from '../../assets/img/bbond.png';
 import BShareImage from '../../assets/img/bshares.png';
 import MetaMask from '../../assets/img/metamask-fox.svg';
-//import useBombMaxiStats from '../../hooks/useBombMaxiStats';
 import HomeImage from '../../assets/img/background.jpg';
 import BombBank from './BombBank';
 import BShareBank from './BShareBank';
@@ -65,21 +50,9 @@ const BackgroundImage = createGlobalStyle`
     background-color: #171923;
   }
 `;
-const TITLE = 'bomb.money | BTC pegged algocoin';
-
-const useStyles = makeStyles((theme) => ({
-    button: {
-      [theme.breakpoints.down('415')]: {
-        // marginTop: '10px'
-      },
-    },
-  }));
 
 const Dashboard = () => {
-    const classes = useStyles();
     const TVL = useTotalValueLocked();
-    const bombFtmLpStats = useLpStatsBTC('BOMB-BTCB-LP');
-    const bShareFtmLpStats = useLpStats('BSHARE-BNB-LP');
     const bombStats = useBombStats();
     const bShareStats = usebShareStats();
     const tBondStats = useBondStats();
@@ -100,49 +73,20 @@ const Dashboard = () => {
     const { to } = useTreasuryAllocationTimes();    
     const {onReward} = useHarvestFromBoardroom();
     const earnings = useEarningsOnBoardroom();
+
     const [approveStatus, approve] = useApprove(bombFinance.BSHARE, bombFinance.contracts.Boardroom.address);
 
-    const buyBombAddress = //'https://app.1inch.io/#/56/swap/BTCB/BOMB';
-    //  'https://pancakeswap.finance/swap?inputCurrency=0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c&outputCurrency=' +
-    'https://app.bogged.finance/bsc/swap?tokenIn=0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c&tokenOut=0x522348779DCb2911539e76A1042aA922F9C47Ee3';
-    //https://pancakeswap.finance/swap?outputCurrency=0x531780FAcE85306877D7e1F05d713D1B50a37F7A';
-    const buyBShareAddress = //'https://app.1inch.io/#/56/swap/BNB/BSHARE';
-        'https://app.bogged.finance/bsc/swap?tokenIn=BNB&tokenOut=0x531780FAcE85306877D7e1F05d713D1B50a37F7A';
-    const buyBusmAddress =
-        'https://app.bogged.finance/bsc/swap?tokenIn=0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56&tokenOut=0x6216B17f696B14701E17BCB24Ec14430261Be94A';
-    const bombLPStats = useMemo(() => (bombFtmLpStats ? bombFtmLpStats : null), [bombFtmLpStats]);
-    const bshareLPStats = useMemo(() => (bShareFtmLpStats ? bShareFtmLpStats : null), [bShareFtmLpStats]);
-    const bombPriceInDollars = useMemo(
-        () => (bombStats ? Number(bombStats.priceInDollars).toFixed(2) : null),
-        [bombStats],
-    );
+    const bombPriceInDollars = useMemo(() => (bombStats ? Number(bombStats.priceInDollars).toFixed(2) : null),[bombStats]);
     const bombPriceInBNB = useMemo(() => (bombStats ? Number(bombStats.tokenInFtm).toFixed(4) : null), [bombStats]);
     const bombCirculatingSupply = useMemo(() => (bombStats ? String(bombStats.circulatingSupply) : null), [bombStats]);
     const bombTotalSupply = useMemo(() => (bombStats ? String(bombStats.totalSupply) : null), [bombStats]);
-
-    const bSharePriceInDollars = useMemo(
-        () => (bShareStats ? Number(bShareStats.priceInDollars).toFixed(2) : null),
-        [bShareStats],
-    );
-    const bSharePriceInBNB = useMemo(
-        () => (bShareStats ? Number(bShareStats.tokenInFtm).toFixed(4) : null),
-        [bShareStats],
-    );
-    const bShareCirculatingSupply = useMemo(
-        () => (bShareStats ? String(bShareStats.circulatingSupply) : null),
-        [bShareStats],
-    );
+    const bSharePriceInDollars = useMemo(() => (bShareStats ? Number(bShareStats.priceInDollars).toFixed(2) : null),[bShareStats]);
+    const bSharePriceInBNB = useMemo(() => (bShareStats ? Number(bShareStats.tokenInFtm).toFixed(4) : null),[bShareStats]);
+    const bShareCirculatingSupply = useMemo(() => (bShareStats ? String(bShareStats.circulatingSupply) : null),[bShareStats]);
     const bShareTotalSupply = useMemo(() => (bShareStats ? String(bShareStats.totalSupply) : null), [bShareStats]);
-
-    const tBondPriceInDollars = useMemo(
-        () => (tBondStats ? Number(tBondStats.priceInDollars).toFixed(2) : null),
-        [tBondStats],
-    );
+    const tBondPriceInDollars = useMemo(() => (tBondStats ? Number(tBondStats.priceInDollars).toFixed(2) : null),[tBondStats]);
     const tBondPriceInBNB = useMemo(() => (tBondStats ? Number(tBondStats.tokenInFtm).toFixed(4) : null), [tBondStats]);
-    const tBondCirculatingSupply = useMemo(
-        () => (tBondStats ? String(tBondStats.circulatingSupply) : null),
-        [tBondStats],
-    );
+    const tBondCirculatingSupply = useMemo(() => (tBondStats ? String(tBondStats.circulatingSupply) : null),[tBondStats]);
     const tBondTotalSupply = useMemo(() => (tBondStats ? String(tBondStats.totalSupply) : null), [tBondStats]);
 
     const bombLpZap = useZap({ depositTokenName: 'BOMB-BTCB-LP' });
@@ -172,16 +116,6 @@ const Dashboard = () => {
         />,
     );
 
-    const [modal, setModal] = useState(false);
-    const [videoLoading, setVideoLoading] = useState(true);
-
-    const openModal = () => {
-        setModal(!modal);
-    };
-
-    const spinner = () => {
-        setVideoLoading(!videoLoading);
-    };
     return (
         <Page>
             <BackgroundImage />
@@ -203,22 +137,22 @@ const Dashboard = () => {
                     <tbody>
                         <tr>
                             <th><img src={BombImage} className="rounded-circle bg-secondary" height={25} width={25}/> $BOMB</th>
-                            <td>{bombCirculatingSupply}</td>
-                            <td>{bombTotalSupply}</td>
+                            <td>{roundAndFormatNumber(bombCirculatingSupply)}</td>
+                            <td>{roundAndFormatNumber(bombTotalSupply)}</td>
                             <td><p className='m-0'>$ {bombPriceInDollars}</p><p className='m-0'>{bombPriceInBNB} BTCB</p></td>
                             <th><img src={MetaMask} height={40} width={40}/></th>
                         </tr>
                         <tr>
                             <th><img src={BShareImage} className="rounded-circle bg-secondary" height={25} width={25}/> $BSHARE</th>
-                            <td>{bShareCirculatingSupply}</td>
-                            <td>{bShareTotalSupply}</td>
+                            <td>{roundAndFormatNumber(bShareCirculatingSupply)}</td>
+                            <td>{roundAndFormatNumber(bShareTotalSupply)}</td>
                             <td><p className='m-0'>$ {bSharePriceInDollars}</p><p className='m-0'>{bSharePriceInBNB} BTCB</p></td>
                             <th><img src={MetaMask} height={40} width={40}/></th>
                         </tr>
                         <tr>
                             <th><img src={BBondImage} className="rounded-circle bg-secondary" height={25} width={25}/> $BBOND</th>
-                            <td>{tBondCirculatingSupply}</td>
-                            <td>{tBondTotalSupply}</td>
+                            <td>{roundAndFormatNumber(tBondCirculatingSupply)}</td>
+                            <td>{roundAndFormatNumber(tBondTotalSupply)}</td>
                             <td><p className='m-0'>$ {tBondPriceInDollars}</p><p className='m-0'>{tBondPriceInBNB} BTCB</p></td>
                             <th><img src={MetaMask} height={40} width={40}/></th>
                         </tr>
@@ -232,7 +166,7 @@ const Dashboard = () => {
                         <p className='my-0'><h2 className='m-0'>{Number(currentEpoch)}</h2>Next Epoch in</p>
                         <hr className='bg-light my-0'/>
                         <small className='my-0'>Live TWAP: <span className='text-success'>{scalingFactor}</span></small><br/>
-                        <small className='my-0'>TVL: <span className='text-success'>${TVL.toFixed(0)}</span></small><br/>
+                        <small className='my-0'>TVL: <span className='text-success'>${roundAndFormatNumber(TVL.toFixed(0))}</span></small><br/>
                         <small className='my-0'>Last Epoch TWAP: <span className='text-success'>{bondScale}</span></small>
                     </div>
                 </div>
@@ -256,7 +190,7 @@ const Dashboard = () => {
                             <div className='col-10'>
                                 <p className='p-0 m-0'>Boardroom <span className='badge bg-success'>Recommended</span></p>
                                 <small>Stake BSHARE and earn BOMB every epoch</small>
-                                <p>TVL: <span className='text-success'>${boardroomTVL.toFixed(0)}</span><span className='mx-3'>|</span>Total Staked: <span className='text-success'>{getDisplayBalance(totalStaked)}</span></p>
+                                <p>TVL: <span className='text-success'>${roundAndFormatNumber(boardroomTVL.toFixed(0))}</span><span className='mx-3'>|</span>Total Staked: <span className='text-success'>{roundAndFormatNumber(getDisplayBalance(totalStaked))}</span></p>
                             </div>
                         </div>
                         <hr className='bg-light'/>
